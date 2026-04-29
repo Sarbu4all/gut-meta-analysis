@@ -21,7 +21,7 @@
 
 ## Introduction
 
-**nf-core/gutmeta** is a bioinformatics pipeline that ...
+**nf-core/gutmeta** is a bioinformatics pipeline that performs shotgun metagenomic data analysis of the human gut microbiome samples related to cardiovascular disease(CVD). The pipeline takes the raw shotgun metagenomic reads from public data repositories such as the Sequence Read Archive (SRA), the European Nucleotide Archive (ENA), and the Metagenomic Atlas (MGy) as input and performs quality control, taxonomic profiling, functional profiling, and pathway analysis. It also produces a comprehensive report of the analysis with various visualizations and statistics.
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
@@ -41,7 +41,23 @@
 <!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
      Explain what rows and columns represent. For instance (please edit as appropriate):
 
-First, prepare a samplesheet with your input data that looks as follows:
+## Create a conda environment
+mamba create -n nextflow-env -c conda-forge -c bioconda python=3.12 nextflow
+eval "$(mamba shell hook --shell zsh)"
+mamba activate nextflow-env
+
+pip install nf-core==4.0.0
+nf-core --version
+
+## Initializing the pipeline
+nf-core pipelines create --name gutmeta --description "Gut Microbiome Meta-analysis" --author "Sarbjeet Niraula" --version 25.10.4.11173 --outdir gut-meta-analysis
+
+## Run the pipeline with a test dataset. Make sure to open docker desktop before running the pipeline if you are using mac.
+cd nf-core-gutmeta
+nextflow run . -profile test,docker --outdir results
+
+
+## Create a samplesheet with your input data that looks as follows:
 
 `samplesheet.csv`:
 
