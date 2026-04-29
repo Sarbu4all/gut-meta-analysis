@@ -1,0 +1,15 @@
+repository_type: pipeline
+
+nf_core_version: 4.0.0
+
+lint: {}
+
+template:
+  org: nf-core
+  name: gutmeta
+  description: Gut Microbiome Meta-analysis
+  author: Sarbjeet Niraula
+  version: 25.10.4.11173
+  force: true
+  outdir: gut-meta-analysis
+  is_nfcore: true
