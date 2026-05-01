@@ -74,6 +74,12 @@ cd sra_downloads
 nextflow run nf-core/fetchngs -profile docker --input sra-ids.csv --outdir ./results
 ```
 
+```bash
+## Since the nf-core/fetchngs pipeline will create a samplesheet for the main workflow, we need to fix the samplesheet before running the main workflow. So, we will use the fix_samplesheet.py script to fix the samplesheet. We will use a bash script to run the above fetchngs workflow and then fix_samplesheet.py script.
+bash run_fetchngs.sh
+## If you want to resume the pipeline, you can use '-resume' option at the end of the bash script.
+```
+
 <!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
      Explain what rows and columns represent. For instance (please edit as appropriate):
 -->
@@ -86,13 +92,13 @@ nf-core modules install sratools/prefetch
 nf-core modules install sratools/fasterqdump
 ```
 
-## Create a samplesheet with your input data that looks as follows:
+## The samplesheet with your input data should look as follows:
 
 `samplesheet.csv`:
 
 ```csv
 sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+<sample_name>,<absolute_path>/sample_name_1.fastq.gz,<absolute_path>/sample_name_2.fastq.gz
 ```
 
 Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
