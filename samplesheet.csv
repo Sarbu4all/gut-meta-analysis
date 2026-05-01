@@ -1,0 +1,4 @@
+sample,fastq_1,fastq_2
+SRX6431971,/Users/sjn/AI_Learning/gut-meta-analysis/sra_downloads/results/fastq/SRX6431971_SRR9671471_1.fastq.gz,/Users/sjn/AI_Learning/gut-meta-analysis/sra_downloads/results/fastq/SRX6431971_SRR9671471_2.fastq.gz
+SRX6431994,/Users/sjn/AI_Learning/gut-meta-analysis/sra_downloads/results/fastq/SRX6431994_SRR9671448_1.fastq.gz,/Users/sjn/AI_Learning/gut-meta-analysis/sra_downloads/results/fastq/SRX6431994_SRR9671448_2.fastq.gz
+SRX6431995,/Users/sjn/AI_Learning/gut-meta-analysis/sra_downloads/results/fastq/SRX6431995_SRR9671447_1.fastq.gz,/Users/sjn/AI_Learning/gut-meta-analysis/sra_downloads/results/fastq/SRX6431995_SRR9671447_2.fastq.gz

@@ -33,13 +33,12 @@
      workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
+
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
 
 ## Create a conda environment
 mamba create -n nextflow-env -c conda-forge -c bioconda python=3.12 nextflow
@@ -56,6 +55,36 @@ nf-core pipelines create --name gutmeta --description "Gut Microbiome Meta-analy
 cd nf-core-gutmeta
 nextflow run . -profile test,docker --outdir results
 
+## Creat this repository in github and push the code to github
+git init
+git branch -M main
+git remote add origin https://github.com/Sarbu4all/gut-meta-analysis.git
+git push -u origin main
+
+## Download data from SRA:
+
+### Process 1: Using nf-core/fetchngs:
+You can use [nf-core/fetchngs](https://nf-co.re/fetchngs/) to download data from SRA and create samplesheet for the pipeline. Follow the instructions on the [nf-core/fetchngs](https://nf-co.re/fetchngs/1.12.0/docs/usage/) documentation to use it.
+This pipeline will also create a clean samplesheet for the main workflow. Therefore we will use this method.
+
+```bash
+## Since running nf-core/fetchngs from project root directory may conflict with the main workflow, we will run it as a separate pipeline in a separate directory.
+mkdir sra_downloads
+cd sra_downloads
+nextflow run nf-core/fetchngs -profile docker --input sra-ids.csv --outdir ./results
+```
+
+<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
+     Explain what rows and columns represent. For instance (please edit as appropriate):
+-->
+
+### Process 2: Integrating SRA download module into the gutmeta pipeline:
+You can install the `fasterqdump` module from the nf-core modules repository and make a subworkflow to download data from SRA. However, you need to create a separate workflow for this pipeline since it will conflict with the main workflow.
+
+```bash
+nf-core modules install sratools/prefetch
+nf-core modules install sratools/fasterqdump
+```
 
 ## Create a samplesheet with your input data that looks as follows:
 
