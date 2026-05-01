@@ -3,10 +3,14 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { KNEADDATA                } from '../modules/local/kneaddata'
+include { KNEADDATA_READ_COUNTS    } from '../modules/local/kneaddata_read_counts'
+include { FASTQC as FASTQC_RAW     } from '../modules/nf-core/fastqc/main'
+include { FASTQC as FASTQC_CLEAN   } from '../modules/nf-core/fastqc/main'
+include { MULTIQC as MULTIQC_RAW   } from '../modules/nf-core/multiqc/main'
+include { MULTIQC as MULTIQC_CLEAN } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap         } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_gutmeta_pipeline'
 
@@ -29,15 +33,54 @@ workflow GUTMETA {
 
     def ch_versions = channel.empty()
     def ch_multiqc_files = channel.empty()
-    //
-    // MODULE: Run FastQC
-    //
-    FASTQC(ch_samplesheet)
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
+    // ----------------------------------------------------------------------------------------------------------------
+    // STEP 1: Run FastQC on raw reads
+    // ----------------------------------------------------------------------------------------------------------------
+    FASTQC_RAW(ch_samplesheet)
 
-    //
-    // Collate and save software versions
-    //
+    // ----------------------------------------------------------------------------------------------------------------
+    // STEP 2: MultiQC report on raw reads
+    // ----------------------------------------------------------------------------------------------------------------
+    MULTIQC_RAW(
+        FASTQC_RAW.out.zip
+            .map { _meta, file -> file }
+            .flatten()
+            .collect()
+            .map { files ->
+                [
+                    [id: 'gutmeta_raw'],
+                    files,
+                    multiqc_config
+                        ? file(multiqc_config, checkIfExists: true)
+                        : file("${projectDir}/assets/multiqc_config.yml", checkIfExists: true),
+                    multiqc_logo ? file(multiqc_logo, checkIfExists: true) : [],
+                    [],
+                    [],
+                ]
+            }
+    )
+
+    // -------------------------------------------------------------------------
+    // STEP 3: KneadData — quality trimming & host decontamination
+    // -------------------------------------------------------------------------
+    ch_kneaddata_db = params.kneaddata_db ? channel.fromPath(params.kneaddata_db).first() : channel.empty()
+    KNEADDATA(ch_samplesheet, ch_kneaddata_db)
+    KNEADDATA_READ_COUNTS(KNEADDATA.out.log.collect())
+
+    // -------------------------------------------------------------------------
+    // STEP 4: FastQC on KneadData-cleaned reads (paired reads only)
+    // -------------------------------------------------------------------------
+    def ch_clean_reads = KNEADDATA.out.reads
+        .map { meta, fastqs ->
+            def paired = fastqs instanceof List ? fastqs : [fastqs]
+            def paired_clean = paired.findAll { f -> f.name =~ /.*_kneaddata_paired_[12]\.fastq\.gz$/ }
+            tuple(meta, paired_clean)
+        }
+    FASTQC_CLEAN(ch_clean_reads)
+
+    // -------------------------------------------------------------------------
+    // STEP 5: Collate software versions for the final MultiQC report
+    // -------------------------------------------------------------------------
     def topic_versions = channel.topic("versions")
         .distinct()
         .branch { entry ->
@@ -49,7 +92,7 @@ workflow GUTMETA {
         .map { process, tool, version ->
             [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
         }
-        .groupTuple(by:0)
+        .groupTuple(by: 0)
         .map { process, tool_versions ->
             tool_versions.unique().sort()
             "${process}:\n${tool_versions.join('\n')}"
@@ -59,27 +102,32 @@ workflow GUTMETA {
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${outdir}/pipeline_info",
-            name: 'nf_core_'  +  'gutmeta_software_'  + 'mqc_'  + 'versions.yml',
-            sort: true,
-            newLine: true
+            name:     'nf_core_gutmeta_software_mqc_versions.yml',
+            sort:     true,
+            newLine:  true
         )
 
-    //
-    // MODULE: MultiQC
-    //
-    ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
-    def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
-    def ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    // -------------------------------------------------------------------------
+    // STEP 6: MultiQC report on cleaned reads (+ pipeline metadata)
+    // -------------------------------------------------------------------------
+    def ch_summary_params     = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    def ch_workflow_summary   = channel.value(paramsSummaryMultiqc(ch_summary_params))
     def ch_multiqc_custom_methods_description = multiqc_methods_description
         ? file(multiqc_methods_description, checkIfExists: true)
         : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
     def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
-    MULTIQC(
-        ch_multiqc_files.flatten().collect().map { files ->
+
+    def ch_multiqc_clean_files = FASTQC_CLEAN.out.zip
+        .map { _meta, file -> file }
+        .mix(KNEADDATA.out.log)
+        .mix(ch_collated_versions)
+        .mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+        .mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
+
+    MULTIQC_CLEAN(
+        ch_multiqc_clean_files.flatten().collect().map { files ->
             [
-                [id: 'gutmeta'],
+                [id: 'gutmeta_clean'],
                 files,
                 multiqc_config
                     ? file(multiqc_config, checkIfExists: true)
@@ -90,8 +138,10 @@ workflow GUTMETA {
             ]
         }
     )
-    emit:multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
+
+    emit:
+    multiqc_report = MULTIQC_CLEAN.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
+    versions       = ch_versions                                                          // channel: [ path(versions.yml) ]
 }
 
 /*
