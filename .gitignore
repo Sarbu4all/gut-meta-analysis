@@ -11,7 +11,10 @@ null/
 .nf-core/
 sra_downloads/*
 !sra_downloads/**/.gitkeep
+!sra_downloads/results/samplesheet/samplesheet.csv
 results/*
+!results/**/.gitkeep
+!results/pipeline_info/
 test_data/*
 databases/*
 !databases/**/.gitkeep
