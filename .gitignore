@@ -10,6 +10,7 @@ null/
 .lineage/
 .nf-core/
 sra_downloads/*
+!sra_downloads/**/.gitkeep
 results/*
 test_data/*
 databases/*
