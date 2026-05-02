@@ -9,6 +9,7 @@ include { FASTQC as FASTQC_RAW     } from '../modules/nf-core/fastqc/main'
 include { FASTQC as FASTQC_CLEAN   } from '../modules/nf-core/fastqc/main'
 include { MULTIQC as MULTIQC_RAW   } from '../modules/nf-core/multiqc/main'
 include { MULTIQC as MULTIQC_CLEAN } from '../modules/nf-core/multiqc/main'
+include { KRAKEN2                  } from '../modules/local/kraken2'
 include { paramsSummaryMap         } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -79,7 +80,13 @@ workflow GUTMETA {
     FASTQC_CLEAN(ch_clean_reads)
 
     // -------------------------------------------------------------------------
-    // STEP 5: Collate software versions for the final MultiQC report
+    // STEP 5: Kraken2 Taxonomic Profiling
+    // -------------------------------------------------------------------------
+    ch_kraken2_db = params.kraken2_db ? channel.fromPath(params.kraken2_db).first() : channel.empty()
+    KRAKEN2(ch_clean_reads, ch_kraken2_db)
+
+    // -------------------------------------------------------------------------
+    // STEP 6: Collate software versions for the final MultiQC report
     // -------------------------------------------------------------------------
     def topic_versions = channel.topic("versions")
         .distinct()
@@ -108,7 +115,7 @@ workflow GUTMETA {
         )
 
     // -------------------------------------------------------------------------
-    // STEP 6: MultiQC report on cleaned reads (+ pipeline metadata)
+    // STEP 7: MultiQC report on cleaned reads (+ pipeline metadata)
     // -------------------------------------------------------------------------
     def ch_summary_params     = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
     def ch_workflow_summary   = channel.value(paramsSummaryMultiqc(ch_summary_params))
