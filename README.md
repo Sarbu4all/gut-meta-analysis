@@ -7,7 +7,7 @@
 
 [![Open in GitHub Codespaces](https://img.shields.io/badge/Open_In_GitHub_Codespaces-black?labelColor=grey&logo=github)](https://github.com/codespaces/new/nf-core/gutmeta)
 [![GitHub Actions CI Status](https://github.com/nf-core/gutmeta/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/gutmeta/actions/workflows/nf-test.yml)
-[![GitHub Actions Linting Status](https://github.com/nf-core/gutmeta/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/gutmeta/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/gutmeta/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)]
+[![GitHub Actions Linting Status](https://github.com/nf-core/gutmeta/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/gutmeta/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/gutmeta/results)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A525.10.4-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
@@ -21,7 +21,7 @@
 
 ## Introduction
 
-**nf-core/gutmeta** is a bioinformatics pipeline that performs shotgun metagenomic data analysis of the human gut microbiome samples related to cardiovascular disease(CVD). The pipeline takes the raw shotgun metagenomic reads from public data repositories such as the Sequence Read Archive (SRA), the European Nucleotide Archive (ENA), and the Metagenomic Atlas (MGy) as input and performs quality control, taxonomic profiling, functional profiling, and pathway analysis. It also produces a comprehensive report of the analysis with various visualizations and statistics.
+**nf-core/gutmeta** is a bioinformatics pipeline that performs shotgun metagenomic data analysis of the human gut microbiome samples related to cardiovascular disease(CVD). The pipeline takes the raw shotgun metagenomic reads from public data repositories such as the Sequence Read Archive (SRA), the European Nucleotide Archive (ENA), and the Metagenomic Atlas (MGy) as input and performs quality control and taxonomic profiling. It also produces a comprehensive report of the analysis with various visualizations and statistics.
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
