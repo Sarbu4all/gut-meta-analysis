@@ -10,6 +10,7 @@ include { FASTQC as FASTQC_CLEAN   } from '../modules/nf-core/fastqc/main'
 include { MULTIQC as MULTIQC_RAW   } from '../modules/nf-core/multiqc/main'
 include { MULTIQC as MULTIQC_CLEAN } from '../modules/nf-core/multiqc/main'
 include { KRAKEN2                  } from '../modules/local/kraken2'
+include { BRACKEN                  } from '../modules/local/bracken'
 include { paramsSummaryMap         } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -86,7 +87,12 @@ workflow GUTMETA {
     KRAKEN2(ch_clean_reads, ch_kraken2_db)
 
     // -------------------------------------------------------------------------
-    // STEP 6: Collate software versions for the final MultiQC report
+    // STEP 6: Bracken Taxonomic Profiling
+    // -------------------------------------------------------------------------
+    BRACKEN(KRAKEN2.out.report, ch_kraken2_db)
+
+    // -------------------------------------------------------------------------
+    // STEP 7: Collate software versions for the final MultiQC report
     // -------------------------------------------------------------------------
     def topic_versions = channel.topic("versions")
         .distinct()
@@ -127,9 +133,9 @@ workflow GUTMETA {
     def ch_multiqc_clean_files = FASTQC_CLEAN.out.zip
         .map { _meta, file -> file }
         .mix(KNEADDATA.out.log)
-        .mix(ch_collated_versions)
-        .mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-        .mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
+        //.mix(ch_collated_versions)
+        //.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml', storeDir: "${outdir}/pipeline_info"))
+        //.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', storeDir: "${outdir}/pipeline_info", sort: true))
 
     MULTIQC_CLEAN(
         ch_multiqc_clean_files.flatten().collect().map { files ->
@@ -148,7 +154,7 @@ workflow GUTMETA {
 
     emit:
     multiqc_report = MULTIQC_CLEAN.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                                                          // channel: [ path(versions.yml) ]
+    versions       = ch_versions 
 }
 
 /*
