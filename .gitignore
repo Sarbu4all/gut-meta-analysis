@@ -12,3 +12,5 @@ null/
 sra_downloads/*
 results/*
 test_data/*
+databases/*
+!databases/**/.gitkeep
