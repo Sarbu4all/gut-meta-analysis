@@ -18,4 +18,4 @@ results/**/*
 !results/pipeline_info/
 databases/**/*
 !databases/**/
-!databases/**/.gitkeep
+!databases/**/.gitkeepdocs/development.md
