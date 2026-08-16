@@ -19,3 +19,4 @@ results/**/*
 databases/**/*
 !databases/**/
 !databases/**/.gitkeepdocs/development.md
+docs/development.md
