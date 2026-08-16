@@ -34,119 +34,93 @@ The workflow automates quality control, host-read removal, and taxonomic profili
 7. **Final QC and reporting** — MultiQC
 
 ## Usage
-
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
+### Prerequisites
 
-## Create a conda environment
-mamba create -n nextflow-env -c conda-forge -c bioconda python=3.12 nextflow
-eval "$(mamba shell hook --shell zsh)"
-mamba activate nextflow-env
+The pipeline requires:
 
-pip install nf-core==4.0.0
-nf-core --version
+- Nextflow
+- Docker, Singularity/Apptainer, or another supported execution environment
+- A valid input samplesheet
 
-## Initializing the pipeline
-nf-core pipelines create --name gutmeta --description "Gut Microbiome Meta-analysis" --author "Sarbjeet Niraula" --version 25.10.4.11173 --outdir gut-meta-analysis
+For local development, the pipeline can also be run using the provided Conda environment.
 
-## Run the pipeline with a test dataset. Make sure to open docker desktop before running the pipeline if you are using mac.
-cd nf-core-gutmeta
-nextflow run . -profile test,docker --outdir results
+### Input samplesheet
 
-## Creat this repository in github and push the code to github
-git init
-git branch -M main
-git remote add origin https://github.com/Sarbu4all/gut-meta-analysis.git
-git push -u origin main
-
-## Download data from SRA:
-
-### Process 1: Using nf-core/fetchngs:
-You can use [nf-core/fetchngs](https://nf-co.re/fetchngs/) to download data from SRA and create samplesheet for the pipeline. Follow the instructions on the [nf-core/fetchngs](https://nf-co.re/fetchngs/1.12.0/docs/usage/) documentation to use it.
-This pipeline will also create a clean samplesheet for the main workflow. Therefore we will use this method.
-
-```bash
-## Since running nf-core/fetchngs from project root directory may conflict with the main workflow, we will run it as a separate pipeline in a separate directory.
-mkdir sra_downloads
-cd sra_downloads
-nextflow run nf-core/fetchngs -profile docker --input sra-ids.csv --outdir ./results
-```
-
-```bash
-## Since the nf-core/fetchngs pipeline will create a samplesheet for the main workflow, we need to fix the samplesheet before running the main workflow. So, we will use the fix_samplesheet.py script to fix the samplesheet. We will use a bash script to run the above fetchngs workflow and then fix_samplesheet.py script.
-bash run_fetchngs.sh
-## If you want to resume the pipeline, you can use '-resume' option at the end of the bash script.
-```
-
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
--->
-
-### Process 2: Integrating SRA download module into the gutmeta pipeline:
-You can install the `fasterqdump` module from the nf-core modules repository and make a subworkflow to download data from SRA. However, you need to create a separate workflow for this pipeline since it will conflict with the main workflow.
-
-```bash
-nf-core modules install sratools/prefetch
-nf-core modules install sratools/fasterqdump
-```
-
-## The samplesheet with your input data should look as follows:
-
-`samplesheet.csv`:
+The pipeline accepts a CSV samplesheet containing sample identifiers and sequencing read paths.
 
 ```csv
 sample,fastq_1,fastq_2
-<sample_name>,<absolute_path>/sample_name_1.fastq.gz,<absolute_path>/sample_name_2.fastq.gz
+sample_01,/path/to/sample_01_R1.fastq.gz,/path/to/sample_01_R2.fastq.gz
+sample_02,/path/to/sample_02_R1.fastq.gz,/path/to/sample_02_R2.fastq.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+## Download data from SRA
 
--->
+### Obtaining data from SRA
 
-Now, you can run the pipeline using:
+Raw sequencing data can be downloaded from the NCBI Sequence Read Archive (SRA) using [`nf-core/fetchngs`](https://nf-co.re/fetchngs/).
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
+Create an input file containing the SRA accession(s):
+
+```csv
+SRR17988757
+SRR17988758
+```
 
 ```bash
-nextflow run nf-core/gutmeta \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+nextflow run nf-core/fetchngs \
+    -profile docker \
+    --input sra-ids.csv \
+    --outdir sra_downloads
 ```
 
-> [!WARNING]
-> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/running/run-pipelines#using-parameter-files).
+### Run the pipeline
 
-For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/gutmeta/usage) and the [parameter documentation](https://nf-co.re/gutmeta/parameters).
+To run the pipeline with Docker:
+
+```bash
+nextflow run . \
+    -profile docker \
+    --input samplesheet.csv \
+    --outdir results
+```
+
+For a quick validation of the installation, run the included test profile:
+
+```bash
+nextflow run . \
+    -profile test,docker \
+    --outdir results
+```
+Nextflow's -resume option can be used to continue an interrupted run without repeating successfully completed processes:
+
+```bash
+nextflow run . \
+    -profile docker \
+    --input samplesheet.csv \
+    --outdir results \
+    -resume
+```
 
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/gutmeta/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/gutmeta/output).
+The pipeline produces quality-control reports, filtered sequencing reads, taxonomic classification results, taxonomic abundance estimates, and Nextflow execution reports.
+
+For a detailed description of the output files and directory structure, see the [output documentation](docs/output.md).
 
 ## Credits
 
 nf-core/gutmeta was originally written by Sarbjeet Niraula.
 
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
-
 ## Contributions and Support
 
-If you would like to contribute to this pipeline, please see the [contributing guidelines](docs/CONTRIBUTING.md).
+Contributions and suggestions are welcome. Please see the [contributing guidelines](docs/CONTRIBUTING.md) for more information.
 
-For further information or help, don't hesitate to get in touch on the [Slack `#gutmeta` channel](https://nfcore.slack.com/channels/gutmeta) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citations
-
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use nf-core/gutmeta for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
-
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
 You can cite the `nf-core` publication as follows:
