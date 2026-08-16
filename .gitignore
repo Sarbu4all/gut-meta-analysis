@@ -18,5 +18,5 @@ results/**/*
 !results/pipeline_info/
 databases/**/*
 !databases/**/
-!databases/**/.gitkeepdocs/development.md
+!databases/**/.gitkeep
 docs/development.md
