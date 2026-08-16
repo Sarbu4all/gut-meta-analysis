@@ -20,19 +20,18 @@
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23gutmeta-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/gutmeta)[![Follow on Bluesky](https://img.shields.io/badge/bluesky-%40nf__core-1185fe?labelColor=000000&logo=bluesky)](https://bsky.app/profile/nf-co.re)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
 
 ## Introduction
+**nf-core/gutmeta** is a reproducible Nextflow pipeline for shotgun metagenomic analysis of human gut microbiome samples, with an initial focus on datasets relevant to cardiovascular disease (CVD).
 
-**nf-core/gutmeta** is a bioinformatics pipeline that performs shotgun metagenomic data analysis of the human gut microbiome samples related to cardiovascular disease(CVD). The pipeline takes the raw shotgun metagenomic reads from public data repositories such as the Sequence Read Archive (SRA), the European Nucleotide Archive (ENA), and the Metagenomic Atlas (MGy) as input and performs quality control and taxonomic profiling. It also produces a comprehensive report of the analysis with various visualizations and statistics.
+The workflow automates quality control, host-read removal, and taxonomic profiling from paired-end or single-end sequencing reads. It uses **FastQC** and **MultiQC** for quality assessment, **KneadData** for host decontamination and read processing, **Kraken2** for taxonomic classification, and **Bracken** for abundance estimation.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
-
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
-
+### Pipeline overview
+1. **Raw-read quality control** — FastQC
+2. **Initial QC reporting** — MultiQC
+3. **Quality filtering and host-read removal** — KneadData
+4. **Post-processing quality control** — FastQC
+5. **Taxonomic classification** — Kraken2
+6. **Taxonomic abundance estimation** — Bracken
+7. **Final QC and reporting** — MultiQC
 
 ## Usage
 
