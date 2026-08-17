@@ -43,6 +43,28 @@
                 }
             }
         },
+        "database_options": {
+            "title": "Reference database options",
+            "type": "object",
+            "fa_icon": "fas fa-database",
+            "description": "Paths to the reference databases required for host-read removal and taxonomic profiling. Without these, the pipeline only runs FastQC/MultiQC on the raw reads and silently skips KneadData, Kraken2, and Bracken.",
+            "properties": {
+                "kneaddata_db": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "exists": true,
+                    "description": "Path to the KneadData reference database directory (e.g. a Bowtie2 human genome index) used for quality trimming and host-read removal.",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "kraken2_db": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "exists": true,
+                    "description": "Path to the Kraken2/Bracken reference database directory used for taxonomic classification and abundance estimation.",
+                    "fa_icon": "fas fa-folder-open"
+                }
+            }
+        },
         "reference_genome_options": {
             "title": "Reference genome options",
             "type": "object",
@@ -236,6 +258,9 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/database_options"
         },
         {
             "$ref": "#/$defs/reference_genome_options"
