@@ -9,13 +9,15 @@ process BRACKEN {
     path db
 
     output:
-    tuple val(meta), path("*.bracken")
+    tuple val(meta), path("*.bracken"), emit: abundance
+    tuple val(meta), path("*.bracken_report"), emit: report
 
     script:
     """
     bracken -d $db \
         -i ${kraken2_report} \
         -o ${meta.id}.bracken \
-        -r 150 -l S
+        -w ${meta.id}.bracken_report \
+        -r 100 -l S
     """
 }
