@@ -25,7 +25,6 @@ process KRAKEN2 {
     kraken2 --db $db \
         --memory-mapping \
         --minimum-hit-groups 3 \
-        --confidence 0.3 \
         --use-names \
         --report-minimizer-data \
         --threads $task.cpus \
