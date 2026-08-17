@@ -3,6 +3,11 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# nf-core/fetchngs still defines legacy Groovy functions (e.g. check_max) in its
+# nextflow.config, which the newer strict/v2 config parser (default since Nextflow
+# 26.04) rejects. Fall back to the legacy parser until fetchngs is updated.
+export NXF_SYNTAX_PARSER=v1
+
 # Define directories and paths
 profile="docker"
 SRA_IDS="sra-ids.csv"
