@@ -1,6 +1,5 @@
 process KRAKEN2 {
     tag "${meta.id}"
-    publishDir "$params.outdir/kraken2_results", mode: 'copy'
     errorStrategy 'retry'
     maxRetries 3
     // This is the default value for maxForks in Nextflow, but it's good to be explicit

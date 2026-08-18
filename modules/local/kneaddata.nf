@@ -1,7 +1,6 @@
 process KNEADDATA {
     tag "${meta.id}"
     container 'quay.io/biocontainers/kneaddata:0.12.1--pyhdfd78af_0'
-    publishDir "${params.outdir}/kneaddata", mode: "copy"
     // Nextflow's local executor sizes concurrency against the host's RAM, which it
     // can see, not the container runtime's memory ceiling (e.g. Docker Desktop's VM),
     // which it can't. Bowtie2 decontamination against the human genome index peaks
