@@ -1,6 +1,5 @@
 process BRACKEN {
     tag "${meta.id}"
-    publishDir "$params.outdir/bracken_results", mode: 'copy'
 
     container 'quay.io/biocontainers/bracken:3.1--h9948957_0'
 
