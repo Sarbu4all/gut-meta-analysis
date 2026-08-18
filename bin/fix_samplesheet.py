@@ -4,14 +4,14 @@ fix_samplesheet.py
 ------------------
 Converts a nf-core/fetchngs samplesheet (which contains relative FASTQ paths
 and possibly padded/quoted field names) into a clean 3-column samplesheet with
-absolute paths suitable for the gutmeta pipeline.
+paths relative to the project root directory suitable for the gutmeta pipeline.
 
 Usage:
     python3 fix_samplesheet.py <input_samplesheet> <fastq_dir> <output_samplesheet>
 
 Arguments:
     input_samplesheet   Path to the fetchngs-produced samplesheet.csv
-    fastq_dir           Absolute path to the directory containing downloaded FASTQ files
+    fastq_dir           Relative path to the directory containing downloaded FASTQ files
     output_samplesheet  Path to write the cleaned samplesheet
 """
 
@@ -30,10 +30,10 @@ def fix_path(raw_path: str, fastq_dir: str) -> str:
     cleaned = raw_path.strip().strip('"').strip()
     if not cleaned:
         return ""
-    
+
     # Just take the filename and place it in our known fastq directory
     filename = os.path.basename(cleaned)
-    return os.path.abspath(os.path.join(fastq_dir, filename))
+    return os.path.normpath(os.path.join(fastq_dir, filename))
 
 def main():
     if len(sys.argv) != 4:
