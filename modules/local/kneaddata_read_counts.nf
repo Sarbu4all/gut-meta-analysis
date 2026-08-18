@@ -1,7 +1,6 @@
 process KNEADDATA_READ_COUNTS {
     tag "all_samples"
     container 'quay.io/biocontainers/kneaddata:0.12.1--pyhdfd78af_0'
-    publishDir "${params.outdir}/kneaddata", mode: "copy"
 
     input:
     path logs
