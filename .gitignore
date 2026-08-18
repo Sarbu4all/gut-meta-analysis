@@ -16,6 +16,7 @@ results/**/*
 !results/**/
 !results/**/.gitkeep
 !results/pipeline_info/
+results_test/
 databases/**/*
 !databases/**/
 !databases/**/.gitkeep
